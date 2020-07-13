@@ -2,6 +2,7 @@ package com.drobot.task6.model.entity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class CustomBook {
 
@@ -10,22 +11,13 @@ public class CustomBook {
     private final int pages;
     private final List<String> authors;
 
-    private long id;
+    private UUID id;
 
     public CustomBook(String name, int releaseYear, int pages, List<String> authors) {
-        this.id = -1;
         this.name = name;
         this.releaseYear = releaseYear;
         this.pages = pages;
         this.authors = authors;
-    }
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
     }
 
     public String getName() {
@@ -42,6 +34,14 @@ public class CustomBook {
 
     public List<String> getAuthors() {
         return new ArrayList<>(authors);
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
     }
 
     @Override
@@ -64,10 +64,6 @@ public class CustomBook {
             return false;
         }
 
-        if (id != customBook.id) {
-            return false;
-        }
-
         if (!name.equals(customBook.name)) {
             return false;
         }
@@ -77,11 +73,11 @@ public class CustomBook {
 
     @Override
     public int hashCode() {
-        int result = name.hashCode();
-        result = 31 * result + authors.hashCode();
+        int result = name != null ? name.hashCode() : 0;
         result = 31 * result + releaseYear;
         result = 31 * result + pages;
-        result = 31 * result + (int) (id ^ (id >>> 32));
+        result = 31 * result + (authors != null ? authors.hashCode() : 0);
+        result = 31 * result + (id != null ? id.hashCode() : 0);
         return result;
     }
 
@@ -89,11 +85,11 @@ public class CustomBook {
     public String toString() {
         final StringBuilder sb = new StringBuilder("CustomBook{");
 
-        sb.append("id=").append(id);
-        sb.append(", name='").append(name).append('\'');
+        sb.append("name='").append(name).append('\'');
         sb.append(", releaseYear=").append(releaseYear);
         sb.append(", pages=").append(pages);
-        sb.append(", FirstAuthor=").append(authors.get(0));
+        sb.append(", authors=").append(authors);
+        sb.append(", id=").append(id);
         sb.append('}');
         return sb.toString();
     }

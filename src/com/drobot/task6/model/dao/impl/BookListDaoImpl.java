@@ -1,170 +1,169 @@
 package com.drobot.task6.model.dao.impl;
 
-import com.drobot.task6.model.comparator.*;
+import com.drobot.task6.exception.DaoException;
+import com.drobot.task6.model.comparator.BookIdByAuthorComparator;
+import com.drobot.task6.model.comparator.BookIdByNameComparator;
+import com.drobot.task6.model.comparator.BookIdByPagesComparator;
+import com.drobot.task6.model.comparator.BookIdByReleaseYearComparator;
 import com.drobot.task6.model.dao.BookListDao;
 import com.drobot.task6.model.entity.CustomBook;
-import com.drobot.task6.exception.BookException;
 import com.drobot.task6.model.entity.Storage;
 
-import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.TreeMap;
+import java.util.UUID;
 
 public class BookListDaoImpl implements BookListDao {
 
-    private final static String NOT_FOUND_EXCEPTION_MESSAGE = "No elements found by ";
-    private final static String ID = "id: ";
-    private final static String NAME = "name: ";
-    private final static String RELEASE_YEAR = "release year: ";
-    private final static String PAGES = "pages: ";
-    private final static String AUTHOR = "author: ";
+    private static final String NULL_EXCEPTION_MESSAGE = "Book is null";
+    private static final String CONTAINED_EXCEPTION_MESSAGE = "Book is already contained";
+    private static final String NOT_CONTAIN_EXCEPTION_MESSAGE = "The storage doesnt contain the book";
 
     private final Storage storage = Storage.getInstance();
 
     @Override
-    public boolean addBook(CustomBook book) throws BookException {
+    public boolean addBook(CustomBook book) throws DaoException {
+        if (book == null) {
+            throw new DaoException(NULL_EXCEPTION_MESSAGE);
+        }
+
+        if (storage.containsValue(book)) {
+            throw new DaoException(CONTAINED_EXCEPTION_MESSAGE);
+        }
+
         return storage.addBook(book);
     }
 
     @Override
-    public boolean removeBook(CustomBook book) throws BookException {
-        return storage.removeBook(book);
+    public boolean removeBook(CustomBook book) throws DaoException {
+        if (book == null) {
+            throw new DaoException(NULL_EXCEPTION_MESSAGE);
+        }
+
+        UUID id = book.getId();
+
+        if (!storage.containsKey(id)) {
+            throw new DaoException(NOT_CONTAIN_EXCEPTION_MESSAGE);
+        }
+
+        return storage.removeBook(id);
     }
 
     @Override
-    public CustomBook findById(long id) throws BookException {
-        List<CustomBook> bookList = storage.getBooksList();
+    public Optional<CustomBook> findById(UUID id) {
+        Optional<CustomBook> result;
 
-        for (CustomBook book : bookList) {
-            if (book.getId() == id) {
-                return book;
-            }
-        }
-        throw new BookException(NOT_FOUND_EXCEPTION_MESSAGE + ID + id);
-    }
-
-    @Override
-    public List<CustomBook> findByName(String name) throws BookException {
-        List<CustomBook> bookList = storage.getBooksList();
-        List<CustomBook> resultList = new ArrayList<>();
-
-        for (CustomBook book : bookList) {
-            if (book.getName().equals(name)) {
-                resultList.add(book);
-            }
-        }
-
-        if (resultList.isEmpty()) {
-            throw new BookException(NOT_FOUND_EXCEPTION_MESSAGE + NAME + name);
+        if (storage.containsKey(id)) {
+            Map<UUID, CustomBook> booksMap = storage.getBooksMap();
+            CustomBook book = booksMap.get(id);
+            result = Optional.of(book);
         } else {
-            return resultList;
+            result = Optional.empty();
         }
+        return result;
     }
 
     @Override
-    public List<CustomBook> findByReleaseYear(int releaseYear) throws BookException {
+    public Map<UUID, CustomBook> findByName(String name) {
+        List<CustomBook> booksList = storage.getBooksList();
+        Map<UUID, CustomBook> result = new HashMap<>();
+
+        for (CustomBook book : booksList) {
+            if (book.getName().equals(name)) {
+                result.put(book.getId(), book);
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public Map<UUID, CustomBook> findByReleaseYear(int releaseYear) {
         List<CustomBook> bookList = storage.getBooksList();
-        List<CustomBook> resultList = new ArrayList<>();
+        Map<UUID, CustomBook> result = new HashMap<>();
 
         for (CustomBook book : bookList) {
             if (book.getReleaseYear() == releaseYear) {
-                resultList.add(book);
+                result.put(book.getId(), book);
             }
         }
-
-        if (resultList.isEmpty()) {
-            throw new BookException(NOT_FOUND_EXCEPTION_MESSAGE + RELEASE_YEAR + releaseYear);
-        } else {
-            return resultList;
-        }
+        return result;
     }
 
     @Override
-    public List<CustomBook> findByPages(int pages) throws BookException {
+    public Map<UUID, CustomBook> findByPages(int pages) {
         List<CustomBook> bookList = storage.getBooksList();
-        List<CustomBook> resultList = new ArrayList<>();
+        Map<UUID, CustomBook> result = new HashMap<>();
 
         for (CustomBook book : bookList) {
             if (book.getPages() == pages) {
-                resultList.add(book);
+                result.put(book.getId(), book);
             }
         }
-
-        if (resultList.isEmpty()) {
-            throw new BookException(NOT_FOUND_EXCEPTION_MESSAGE + PAGES + pages);
-        } else {
-            return resultList;
-        }
+        return result;
     }
 
     @Override
-    public List<CustomBook> findByAuthor(String author) throws BookException {
+    public Map<UUID, CustomBook> findByAuthors(List<String> authors) {
         List<CustomBook> bookList = storage.getBooksList();
-        List<CustomBook> resultList = new ArrayList<>();
+        Map<UUID, CustomBook> result = new HashMap<>();
 
         for (CustomBook book : bookList) {
-            List<String> authors = book.getAuthors();
+            List<String> actualAuthors = book.getAuthors();
 
-            if (authors.contains(author)) {
-                resultList.add(book);
+            if (actualAuthors.containsAll(authors)) {
+                result.put(book.getId(), book);
             }
         }
-
-        if (resultList.isEmpty()) {
-            throw new BookException(NOT_FOUND_EXCEPTION_MESSAGE + AUTHOR + author);
-        } else {
-            return resultList;
-        }
+        return result;
     }
 
     @Override
-    public List<CustomBook> sortBooksById() {
-        List<CustomBook> bookList = storage.getBooksList();
-        Comparator<CustomBook> comparator = new BookIdComparator();
-        bookList.sort(comparator);
-
-        return bookList;
+    public Map<UUID, CustomBook> sortBooksById() {
+        Map<UUID, CustomBook> booksMap = storage.getBooksMap();
+        return new TreeMap<>(booksMap);
     }
 
     @Override
-    public List<CustomBook> sortBooksByName() {
-        List<CustomBook> bookList = storage.getBooksList();
-        Comparator<CustomBook> comparator = new BookNameComparator();
-        bookList.sort(comparator);
+    public Map<UUID, CustomBook> sortBooksByName() {
+        Map<UUID, CustomBook> booksMap = storage.getBooksMap();
+        Comparator<UUID> comparator = new BookIdByNameComparator();
+        Map<UUID, CustomBook> result = new TreeMap<>(comparator);
+        result.putAll(booksMap);
 
-        return bookList;
+        return result;
     }
 
     @Override
-    public List<CustomBook> sortBooksByReleaseYear() {
-        List<CustomBook> bookList = storage.getBooksList();
-        Comparator<CustomBook> comparator = new BookReleaseYearComparator();
-        bookList.sort(comparator);
+    public Map<UUID, CustomBook> sortBooksByReleaseYear() {
+        Map<UUID, CustomBook> booksMap = storage.getBooksMap();
+        Comparator<UUID> comparator = new BookIdByReleaseYearComparator();
+        Map<UUID, CustomBook> result = new TreeMap<>(comparator);
+        result.putAll(booksMap);
 
-        return bookList;
+        return result;
     }
 
     @Override
-    public List<CustomBook> sortBooksByPages() {
-        List<CustomBook> bookList = storage.getBooksList();
-        Comparator<CustomBook> comparator = new BookPagesComparator();
-        bookList.sort(comparator);
+    public Map<UUID, CustomBook> sortBooksByPages() {
+        Map<UUID, CustomBook> booksMap = storage.getBooksMap();
+        Comparator<UUID> comparator = new BookIdByPagesComparator();
+        Map<UUID, CustomBook> result = new TreeMap<>(comparator);
+        result.putAll(booksMap);
 
-        return bookList;
+        return result;
     }
 
     @Override
-    public List<CustomBook> sortBooksByAuthor() {
-        List<CustomBook> bookList = storage.getBooksList();
-        Comparator<CustomBook> comparator = new BookAuthorComparator();
-        bookList.sort(comparator);
+    public Map<UUID, CustomBook> sortBooksByAuthor() {
+        Map<UUID, CustomBook> booksMap = storage.getBooksMap();
+        Comparator<UUID> comparator = new BookIdByAuthorComparator();
+        Map<UUID, CustomBook> result = new TreeMap<>(comparator);
+        result.putAll(booksMap);
 
-        return bookList;
-    }
-
-    @Override
-    public boolean contains(CustomBook book) {
-        List<CustomBook> books = storage.getBooksList();
-        return books.contains(book);
+        return result;
     }
 }

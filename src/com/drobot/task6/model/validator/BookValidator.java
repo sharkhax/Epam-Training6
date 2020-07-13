@@ -40,17 +40,19 @@ public class BookValidator {
         return (pages > MIX_PAGES && pages < MAX_PAGES);
     }
 
+    public boolean areFieldsValid(String name, int releaseYear, int pages, List<String> authors) {
+        return isNameValid(name) && isReleaseYearValid(releaseYear) && arePagesValid(pages)
+                && areAuthorsValid(authors);
+    }
+
     public boolean areAuthorsValid(List<String> authors) {
         boolean result = true;
 
         if (authors == null || authors.isEmpty() || authors.size() > MAX_AUTHORS) {
             result = false;
         } else {
-            for (String author : authors) {
-                Pattern pattern = Pattern.compile(AUTHOR_REGEX);
-                Matcher matcher = pattern.matcher(author);
-
-                if (!matcher.matches()) {
+            for (String actualAuthor : authors) {
+                if (!isAuthorValid(actualAuthor)) {
                     result = false;
                     break;
                 }
@@ -59,12 +61,11 @@ public class BookValidator {
         return result;
     }
 
-    public boolean isAuthorValid(String author) {
+    private boolean isAuthorValid(String author) {
         boolean result;
 
         if (author == null) {
             result = false;
-
         } else {
             Pattern pattern = Pattern.compile(AUTHOR_REGEX);
             Matcher matcher = pattern.matcher(author);
@@ -72,10 +73,5 @@ public class BookValidator {
             result = matcher.matches();
         }
         return result;
-    }
-
-    public boolean areFieldsValid(String name, int releaseYear, int pages, List<String> authors) {
-        return isNameValid(name) && isReleaseYearValid(releaseYear) && arePagesValid(pages)
-                && areAuthorsValid(authors);
     }
 }

@@ -1,24 +1,23 @@
 package com.drobot.task6.model.entity;
 
-import com.drobot.task6.exception.BookException;
 import com.drobot.task6.model.service.IdService;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public class Storage {
 
     private static final int CAPACITY = 200;
-    private static final String NULL_EXCEPTION_MESSAGE = "Book is null";
-    private static final String CONTAINED_EXCEPTION_MESSAGE = "Book is already contained";
-    private static final String NOT_CONTAIN_EXCEPTION_MESSAGE = "The storage doesnt contain the book";
 
     private static Storage INSTANCE;
-    private final List<CustomBook> booksList;
+    private final Map<UUID, CustomBook> booksMap;
 
     private Storage() {
-        booksList = new ArrayList<>(CAPACITY);
+        booksMap = new HashMap<>(CAPACITY);
     }
 
     public static Storage getInstance() {
@@ -28,43 +27,44 @@ public class Storage {
         return INSTANCE;
     }
 
-    public List<CustomBook> getBooksList() {
-        return Collections.unmodifiableList(booksList);
+    public Map<UUID, CustomBook> getBooksMap() {
+        return Collections.unmodifiableMap(booksMap);
     }
 
-    public boolean addBook(CustomBook book) throws BookException {
-        if (book == null) {
-            throw new BookException(NULL_EXCEPTION_MESSAGE);
-        }
+    public List<CustomBook> getBooksList() {
+        return new ArrayList<>(booksMap.values());
+    }
 
-        if (booksList.contains(book)) {
-            throw new BookException(CONTAINED_EXCEPTION_MESSAGE);
-        }
-
+    public boolean addBook(CustomBook book) {
         boolean result;
 
-        if (booksList.size() == CAPACITY) {
+        if (booksMap.size() == CAPACITY) {
             result = false;
         } else {
             IdService idService = new IdService();
-            long id = idService.generateId();
+            UUID id = idService.generateId();
             book.setId(id);
-            result = booksList.add(book);
+            booksMap.put(id, book);
+            result = true;
         }
 
         return result;
     }
 
-    public boolean removeBook(CustomBook book) throws BookException {
-        if (book == null) {
-            throw new BookException(NULL_EXCEPTION_MESSAGE);
-        }
+    public boolean removeBook(UUID id) {
+        booksMap.remove(id);
+        return true;
+    }
 
-        if (!booksList.contains(book)) {
-            throw new BookException(NOT_CONTAIN_EXCEPTION_MESSAGE);
-        }
+    public int size() {
+        return booksMap.size();
+    }
 
-        book.setId(-1);
-        return booksList.remove(book);
+    public boolean containsValue(CustomBook book) {
+        return booksMap.containsValue(book);
+    }
+
+    public boolean containsKey(UUID id) {
+        return booksMap.containsKey(id);
     }
 }
