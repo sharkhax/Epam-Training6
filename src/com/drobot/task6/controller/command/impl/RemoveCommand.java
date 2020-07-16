@@ -17,7 +17,7 @@ public class RemoveCommand implements ActionCommand {
     @Override
     public Optional<Map<UUID, CustomBook>> execute(String... params) throws CommandException {
         if (params.length == 1) {
-            Optional<Map<UUID, CustomBook>> result;
+            Optional<Map<UUID, CustomBook>> result = Optional.empty();
             String stringId = params[ID_POSITION];
             UUID id;
             StorageService storageService;
@@ -30,8 +30,6 @@ public class RemoveCommand implements ActionCommand {
             try {
                 if (storageService.removeBook(id)) {
                     result = Optional.of(Map.of());
-                } else {
-                    result = Optional.empty();
                 }
             } catch (ServiceException e) {
                 throw new CommandException(e.getMessage());
