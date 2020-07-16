@@ -1,8 +1,8 @@
 package test.com.drobot.task6;
 
 import com.drobot.task6.controller.Invoker;
+import com.drobot.task6.exception.CommandException;
 import com.drobot.task6.exception.ServiceException;
-import com.drobot.task6.exception.ValueException;
 import com.drobot.task6.model.entity.CustomBook;
 import com.drobot.task6.model.entity.Storage;
 import com.drobot.task6.model.service.StorageService;
@@ -45,21 +45,18 @@ public class AddBookTest {
         try {
             optional = invoker.processRequest("add_book", "Book 8", "1820", "241", "Vlad", "Drobot", "Sergey");
             result = optional.isPresent();
-        } catch (ValueException | ServiceException e) {
+        } catch (CommandException e) {
             fail();
         }
         assertTrue(result);
     }
 
-    @Test(expectedExceptions = ServiceException.class)
-    public void addBookTest_BookExists() throws ServiceException {
+    @Test(expectedExceptions = CommandException.class)
+    public void addBookTest_BookExists() throws CommandException {
         Invoker invoker = new Invoker();
-        try {
-            invoker.processRequest("add_book", "Book 8", "2010", "241", "Vlad");
-            invoker.processRequest("add_book", "Book 8", "2010", "241", "Vlad");
-        } catch (ValueException e) {
-            fail();
-        }
+        invoker.processRequest("add_book", "Book 8", "2010", "241", "Vlad");
+        invoker.processRequest("add_book", "Book 8", "2010", "241", "Vlad");
+
     }
 
     @AfterTest

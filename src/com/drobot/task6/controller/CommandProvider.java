@@ -1,8 +1,7 @@
-package com.drobot.task6.provider;
+package com.drobot.task6.controller;
 
-import com.drobot.task6.command.ActionCommand;
+import com.drobot.task6.controller.command.ActionCommand;
 import com.drobot.task6.type.CommandType;
-import com.drobot.task6.util.TypeUtil;
 
 import java.util.Optional;
 
@@ -12,13 +11,11 @@ public class CommandProvider {
     }
 
     public static Optional<ActionCommand> defineCommand(String commandName) {
-        TypeUtil util = new TypeUtil();
-
-        if (util.containsCommand(commandName.toUpperCase())) {
+        try {
             CommandType type = CommandType.valueOf(commandName.toUpperCase());
             ActionCommand command = type.getCommand();
             return Optional.of(command);
-        } else {
+        } catch (IllegalArgumentException e) {
             return Optional.empty();
         }
     }

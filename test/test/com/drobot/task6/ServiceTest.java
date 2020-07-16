@@ -1,8 +1,7 @@
 package test.com.drobot.task6;
 
 import com.drobot.task6.controller.Invoker;
-import com.drobot.task6.exception.ServiceException;
-import com.drobot.task6.exception.ValueException;
+import com.drobot.task6.exception.CommandException;
 import com.drobot.task6.model.entity.CustomBook;
 import org.testng.annotations.Test;
 
@@ -22,7 +21,7 @@ public class ServiceTest {
         try {
             optional = controller.processRequest("add_book", "Book 8", "2021", "241", "Vlad");
             result = optional.isEmpty();
-        } catch (ValueException | ServiceException e) {
+        } catch (CommandException e) {
             fail();
         }
         assertTrue(result);

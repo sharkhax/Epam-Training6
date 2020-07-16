@@ -1,10 +1,10 @@
 package com.drobot.task6.type;
 
-import com.drobot.task6.command.ActionCommand;
-import com.drobot.task6.command.impl.AddCommand;
-import com.drobot.task6.command.impl.FindCommand;
-import com.drobot.task6.command.impl.RemoveCommand;
-import com.drobot.task6.command.impl.SortCommand;
+import com.drobot.task6.controller.command.ActionCommand;
+import com.drobot.task6.controller.command.impl.AddCommand;
+import com.drobot.task6.controller.command.impl.FindCommand;
+import com.drobot.task6.controller.command.impl.RemoveCommand;
+import com.drobot.task6.controller.command.impl.SortCommand;
 
 public enum CommandType {
     ADD_BOOK(new AddCommand()), REMOVE_BOOK(new RemoveCommand()),

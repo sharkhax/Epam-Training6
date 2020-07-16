@@ -12,7 +12,6 @@ import java.util.UUID;
 public class Storage {
 
     private static final int CAPACITY = 200;
-
     private static Storage INSTANCE;
     private final Map<UUID, CustomBook> booksMap;
 
@@ -35,24 +34,20 @@ public class Storage {
         return new ArrayList<>(booksMap.values());
     }
 
-    public boolean addBook(CustomBook book) {
-        boolean result;
-
-        if (booksMap.size() == CAPACITY) {
-            result = false;
-        } else {
+    public boolean add(CustomBook book) {
+        boolean result = false;
+        if (booksMap.size() != CAPACITY) {
             IdService idService = new IdService();
             UUID id = idService.generateId();
-            book.setId(id);
+            book.setBookId(id);
             booksMap.put(id, book);
             result = true;
         }
-
         return result;
     }
 
-    public boolean removeBook(UUID id) {
-        booksMap.remove(id);
+    public boolean remove(CustomBook book) {
+        booksMap.remove(book.getBookId());
         return true;
     }
 

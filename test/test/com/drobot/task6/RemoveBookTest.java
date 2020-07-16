@@ -1,8 +1,8 @@
 package test.com.drobot.task6;
 
 import com.drobot.task6.controller.Invoker;
+import com.drobot.task6.exception.CommandException;
 import com.drobot.task6.exception.ServiceException;
-import com.drobot.task6.exception.ValueException;
 import com.drobot.task6.model.entity.CustomBook;
 import com.drobot.task6.model.entity.Storage;
 import com.drobot.task6.model.service.StorageService;
@@ -32,7 +32,6 @@ public class RemoveBookTest {
         List<String> authors3 = new ArrayList<>();
         authors3.add("Petya");
         authors3.add("Ivanov");
-
         try {
             service.addBook("Book 1", 2000, 120, authors1);
             service.addBook("Book 2", 2010, 12, authors2);
@@ -46,36 +45,23 @@ public class RemoveBookTest {
     public void removeBookTest_True() {
         Invoker invoker = new Invoker();
         Storage storage = Storage.getInstance();
-        UUID id = storage.getBooksList().get(0).getId();
+        UUID id = storage.getBooksList().get(0).getBookId();
         Optional<Map<UUID, CustomBook>> optional;
         boolean result = false;
-
         try {
             optional = invoker.processRequest("remove_book", id.toString());
             result = optional.isPresent();
 
-        } catch (ValueException | ServiceException e) {
+        } catch (CommandException e) {
             fail();
         }
-
         assertTrue(result);
     }
 
-    @Test(expectedExceptions = ServiceException.class)
-    public void removeBookTest_NotContained() throws ServiceException {
+    @Test(expectedExceptions = CommandException.class)
+    public void removeBookTest_NotContained() throws CommandException {
         Invoker invoker = new Invoker();
-        Optional<Map<UUID, CustomBook>> optional;
-        boolean result = false;
-
-        try {
-            optional = invoker.processRequest("remove_book", UUID.randomUUID().toString());
-            result = optional.isPresent();
-
-        } catch (ValueException e) {
-            fail();
-        }
-
-        assertTrue(result);
+        invoker.processRequest("remove_book", UUID.randomUUID().toString());
     }
 
     @AfterTest

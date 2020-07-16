@@ -2,7 +2,7 @@ package test.com.drobot.task6;
 
 import com.drobot.task6.controller.Invoker;
 import com.drobot.task6.exception.ServiceException;
-import com.drobot.task6.exception.ValueException;
+import com.drobot.task6.exception.CommandException;
 import com.drobot.task6.model.entity.CustomBook;
 import com.drobot.task6.model.service.StorageService;
 import org.testng.annotations.AfterTest;
@@ -58,22 +58,19 @@ public class SortTest {
 
     @Test
     public void sortBooksTest() {
-        final String tag = "authors";
-
+        final String tag = "name";
         Invoker invoker = new Invoker();
         Optional<Map<UUID, CustomBook>> optional;
         Map<UUID, CustomBook> booksMap;
         boolean result = false;
-
         try {
             optional = invoker.processRequest("sort_books", tag);
-
             if (optional.isPresent()) {
                 booksMap = optional.get();
                 books = new ArrayList<>(booksMap.values());
                 result = true;
             }
-        } catch (ServiceException | ValueException e) {
+        } catch (CommandException e) {
             e.printStackTrace();
             fail();
         }

@@ -15,45 +15,27 @@ import java.util.UUID;
 
 public class StorageService {
 
-    private static final String INVALID_VALUE_EXCEPTION_MESSAGE = "Invalid value";
-    private static final String INCORRECT_TAG_EXCEPTION_MESSAGE = "Invalid tag";
-
     public boolean addBook(String name, int releaseYear, int pages, List<String> authors) throws ServiceException {
         BookValidator bookValidator = new BookValidator();
         CustomBook book;
         BookListDao dao;
-        boolean result;
-
+        boolean result = false;
         if (bookValidator.areFieldsValid(name, releaseYear, pages, authors)) {
             dao = new BookListDaoImpl();
             book = new CustomBook(name, releaseYear, pages, authors);
-
             try {
-                result = dao.addBook(book);
+                result = dao.add(book);
             } catch (DaoException e) {
                 throw new ServiceException(e.getMessage());
             }
-        } else {
-            result = false;
         }
         return result;
     }
 
     public boolean removeBook(UUID id) throws ServiceException {
         BookListDao dao = new BookListDaoImpl();
-        CustomBook book;
-        Optional<CustomBook> optional;
-        boolean result;
-
         try {
-            optional = dao.findById(id);
-            if (optional.isPresent()) {
-                book = optional.get();
-                result = dao.removeBook(book);
-            } else {
-                result = false;
-            }
-            return result;
+            return dao.remove(id);
         } catch (DaoException e) {
             throw new ServiceException(e.getMessage());
         }
@@ -63,7 +45,6 @@ public class StorageService {
         BookListDao dao = new BookListDaoImpl();
         Map<UUID, CustomBook> result;
         Optional<CustomBook> optional = dao.findById(id);
-
         if (optional.isPresent()) {
             result = Map.of(id, optional.get());
         } else {
@@ -72,65 +53,65 @@ public class StorageService {
         return result;
     }
 
-    public Map<UUID, CustomBook> findByName(String name) throws ServiceException {
+    public Map<UUID, CustomBook> findByName(String name) {
         BookValidator validator = new BookValidator();
         BookListDao dao;
-
+        Map<UUID, CustomBook> result;
         if (validator.isNameValid(name)) {
             dao = new BookListDaoImpl();
-            return dao.findByName(name);
+            result = dao.findByName(name);
         } else {
-            throw new ServiceException(INVALID_VALUE_EXCEPTION_MESSAGE);
+            result = Map.of();
         }
+        return result;
     }
 
-    public Map<UUID, CustomBook> findByReleaseYear(int releaseYear) throws ServiceException {
+    public Map<UUID, CustomBook> findByReleaseYear(int releaseYear) {
         BookValidator validator = new BookValidator();
         BookListDao dao;
-
+        Map<UUID, CustomBook> result;
         if (validator.isReleaseYearValid(releaseYear)) {
             dao = new BookListDaoImpl();
-            return dao.findByReleaseYear(releaseYear);
+            result = dao.findByReleaseYear(releaseYear);
         } else {
-            throw new ServiceException(INVALID_VALUE_EXCEPTION_MESSAGE);
+            result = Map.of();
         }
+        return result;
     }
 
-    public Map<UUID, CustomBook> findByPages(int pages) throws ServiceException {
+    public Map<UUID, CustomBook> findByPages(int pages) {
         BookValidator validator = new BookValidator();
         BookListDao dao;
-
+        Map<UUID, CustomBook> result;
         if (validator.arePagesValid(pages)) {
             dao = new BookListDaoImpl();
-            return dao.findByPages(pages);
+            result = dao.findByPages(pages);
         } else {
-            throw new ServiceException(INVALID_VALUE_EXCEPTION_MESSAGE);
+            result = Map.of();
         }
+        return result;
     }
 
-    public Map<UUID, CustomBook> findByAuthors(List<String> authors) throws ServiceException {
+    public Map<UUID, CustomBook> findByAuthors(List<String> authors) {
         BookValidator validator = new BookValidator();
         BookListDao dao;
-
+        Map<UUID, CustomBook> result;
         if (validator.areAuthorsValid(authors)) {
             dao = new BookListDaoImpl();
-            return dao.findByAuthors(authors);
+            result = dao.findByAuthors(authors);
         } else {
-            throw new ServiceException(INVALID_VALUE_EXCEPTION_MESSAGE);
+            result = Map.of();
         }
+        return result;
     }
 
     public Map<UUID, CustomBook> sort(CustomTag tag) throws ServiceException {
         BookListDao dao = new BookListDaoImpl();
         Map<UUID, CustomBook> result;
-
-        switch (tag) {
-            case ID -> result = dao.sortBooksById();
-            case NAME -> result = dao.sortBooksByName();
-            case RELEASE_YEAR -> result = dao.sortBooksByReleaseYear();
-            case PAGES -> result = dao.sortBooksByPages();
-            case AUTHORS -> result = dao.sortBooksByAuthor();
-            default -> throw new ServiceException(INCORRECT_TAG_EXCEPTION_MESSAGE);
+        try {
+            result = dao.sortByTag(tag.toString());
+        } catch (DaoException e) {
+            throw new ServiceException(e.getMessage());
         }
         return result;
     }

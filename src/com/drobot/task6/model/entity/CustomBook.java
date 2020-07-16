@@ -1,17 +1,16 @@
 package com.drobot.task6.model.entity;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
 public class CustomBook {
 
-    private final String name;
-    private final int releaseYear;
-    private final int pages;
+    private UUID bookId;
+    private String name;
+    private int releaseYear;
+    private int pages;
     private final List<String> authors;
-
-    private UUID id;
 
     public CustomBook(String name, int releaseYear, int pages, List<String> authors) {
         this.name = name;
@@ -33,15 +32,15 @@ public class CustomBook {
     }
 
     public List<String> getAuthors() {
-        return new ArrayList<>(authors);
+        return Collections.unmodifiableList(authors);
     }
 
-    public UUID getId() {
-        return id;
+    public UUID getBookId() {
+        return bookId;
     }
 
-    public void setId(UUID id) {
-        this.id = id;
+    public void setBookId(UUID bookId) {
+        this.bookId = bookId;
     }
 
     @Override
@@ -49,25 +48,19 @@ public class CustomBook {
         if (this == o) {
             return true;
         }
-
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-
         CustomBook customBook = (CustomBook) o;
-
         if (releaseYear != customBook.releaseYear) {
             return false;
         }
-
         if (pages != customBook.pages) {
             return false;
         }
-
         if (!name.equals(customBook.name)) {
             return false;
         }
-
         return authors.equals(customBook.authors);
     }
 
@@ -77,19 +70,18 @@ public class CustomBook {
         result = 31 * result + releaseYear;
         result = 31 * result + pages;
         result = 31 * result + (authors != null ? authors.hashCode() : 0);
-        result = 31 * result + (id != null ? id.hashCode() : 0);
+        result = 31 * result + (bookId != null ? bookId.hashCode() : 0);
         return result;
     }
 
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("CustomBook{");
-
-        sb.append("name='").append(name).append('\'');
+        sb.append("id=").append(bookId);
+        sb.append(", name='").append(name).append('\'');
         sb.append(", releaseYear=").append(releaseYear);
         sb.append(", pages=").append(pages);
         sb.append(", authors=").append(authors);
-        sb.append(", id=").append(id);
         sb.append('}');
         return sb.toString();
     }
