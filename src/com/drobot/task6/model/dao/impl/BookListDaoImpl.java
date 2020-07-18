@@ -18,13 +18,9 @@ import java.util.UUID;
 
 public class BookListDaoImpl implements BookListDao {
 
-    private final Storage storage = Storage.getInstance();
-
     @Override
     public boolean add(CustomBook book) throws DaoException {
-        if (book == null) {
-            throw new DaoException("The book is null");
-        }
+        final Storage storage = Storage.getInstance();
         if (storage.containsValue(book)) {
             throw new DaoException("The book is already contained");
         }
@@ -33,14 +29,18 @@ public class BookListDaoImpl implements BookListDao {
 
     @Override
     public boolean remove(UUID id) throws DaoException {
+        final Storage storage = Storage.getInstance();
         if (storage.containsKey(id)) {
             CustomBook book = storage.getBooksMap().get(id);
             return storage.remove(book);
-        } else throw new DaoException("There is no such book");
+        } else {
+            throw new DaoException("There is no such book");
+        }
     }
 
     @Override
     public Optional<CustomBook> findById(UUID id) {
+        final Storage storage = Storage.getInstance();
         Optional<CustomBook> result = Optional.empty();
         if (storage.containsKey(id)) {
             Map<UUID, CustomBook> booksMap = storage.getBooksMap();
@@ -52,6 +52,7 @@ public class BookListDaoImpl implements BookListDao {
 
     @Override
     public Map<UUID, CustomBook> findByName(String name) {
+        final Storage storage = Storage.getInstance();
         List<CustomBook> booksList = storage.getBooksList();
         Map<UUID, CustomBook> result = new HashMap<>();
         for (CustomBook book : booksList) {
@@ -64,6 +65,7 @@ public class BookListDaoImpl implements BookListDao {
 
     @Override
     public Map<UUID, CustomBook> findByReleaseYear(int releaseYear) {
+        final Storage storage = Storage.getInstance();
         List<CustomBook> bookList = storage.getBooksList();
         Map<UUID, CustomBook> result = new HashMap<>();
         for (CustomBook book : bookList) {
@@ -76,6 +78,7 @@ public class BookListDaoImpl implements BookListDao {
 
     @Override
     public Map<UUID, CustomBook> findByPages(int pages) {
+        final Storage storage = Storage.getInstance();
         List<CustomBook> bookList = storage.getBooksList();
         Map<UUID, CustomBook> result = new HashMap<>();
         for (CustomBook book : bookList) {
@@ -88,6 +91,7 @@ public class BookListDaoImpl implements BookListDao {
 
     @Override
     public Map<UUID, CustomBook> findByAuthors(List<String> authors) {
+        final Storage storage = Storage.getInstance();
         List<CustomBook> bookList = storage.getBooksList();
         Map<UUID, CustomBook> result = new HashMap<>();
         for (CustomBook book : bookList) {
@@ -101,6 +105,7 @@ public class BookListDaoImpl implements BookListDao {
 
     @Override
     public Map<UUID, CustomBook> sortByTag(String tag) throws DaoException {
+        final Storage storage = Storage.getInstance();
         BookMapComparatorType comparatorType;
         if (tag.equalsIgnoreCase("id")) {
             return sortById();
@@ -122,6 +127,7 @@ public class BookListDaoImpl implements BookListDao {
     }
 
     private Map<UUID, CustomBook> sortById() {
+        final Storage storage = Storage.getInstance();
         Map<UUID, CustomBook> booksMap = storage.getBooksMap();
         return new TreeMap<>(booksMap);
     }
